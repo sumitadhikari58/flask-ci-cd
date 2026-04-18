@@ -1,0 +1,32 @@
+name: Deploy Flask App
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run tests
+        run: pytest test_app.py
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          key: ${{ secrets.EC2_KEY }}
+          username: ubuntu
+          script: |
+            cd ~/app && git pull
+            pip3 install -r requirements.txt
+            pkill -f "python3 app.py" || true
+            nohup python3 app.py > app.log 2>&1 &
