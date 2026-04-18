@@ -28,9 +28,6 @@ jobs:
           key_path: ""
           port: 22
           script: |
-            cd ~/app && git pull
-            source venv/bin/activate
-            pip install -r requirements.txt
-            pkill -f "python3 app.py" || true
-            nohup /home/ubuntu/app/venv/bin/python3 app.py > ~/app/app.log 2>&1 &
-            disown
+                cd ~/app && git pull
+                pip install -r requirements.txt
+                sudo systemctl restart flask
